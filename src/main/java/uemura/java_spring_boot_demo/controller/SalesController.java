@@ -10,16 +10,16 @@ import uemura.java_spring_boot_demo.domais.SalesRequestDto;
 import uemura.java_spring_boot_demo.service.SalesService;
 
 @RestController
-@RequestMapping("api/public/sales")
+@RequestMapping("api/public")
 public class SalesController {
 
     @Autowired
     private SalesService salesService;
 
-    @PostMapping("/v1/")
-    public ResponseEntity login(@RequestBody SalesRequestDto requestDto) {
+    @PostMapping("/v1/sales")
+    public ResponseEntity sales(@RequestBody SalesRequestDto requestDto) {
         salesService.saveSales(requestDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }
