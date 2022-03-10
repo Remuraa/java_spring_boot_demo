@@ -18,7 +18,7 @@ public class SalesController {
 
     @PostMapping("/v1/sales")
     public ResponseEntity sales(@RequestBody SalesRequestDto requestDto) {
-        salesService.saveSales(requestDto);
+        salesService.saveSales(requestDto); //TODO look how mock this in groovy test
         return ResponseEntity.noContent().build();
     }
 
