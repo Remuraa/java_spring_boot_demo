@@ -3,7 +3,6 @@ package uemura.java_spring_boot_demo.domais.transfer;
 import com.poiji.annotation.ExcelCellName;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class IrExceltDto implements Serializable {
@@ -19,9 +18,20 @@ public class IrExceltDto implements Serializable {
     @ExcelCellName("Instituição")
     private String institution;
     @ExcelCellName("Quantidade")
-    private BigDecimal quantity;
+    private String quantity;
     @ExcelCellName("Preço unitário")
-    private BigDecimal priceUnity;
+    private String unityPrice;
+    @ExcelCellName("Valor da Operação")
+    private String totalPrice;
+
+    public String getTypeMoviment() {
+        return typeMoviment;
+    }
+
+    public IrExceltDto setTypeMoviment(String typeMoviment) {
+        this.typeMoviment = typeMoviment;
+        return this;
+    }
 
     public LocalDate getDate() {
         return date;
@@ -59,21 +69,30 @@ public class IrExceltDto implements Serializable {
         return this;
     }
 
-    public BigDecimal getQuantity() {
+    public String getQuantity() {
         return quantity;
     }
 
-    public IrExceltDto setQuantity(BigDecimal quantity) {
+    public IrExceltDto setQuantity(String quantity) {
         this.quantity = quantity;
         return this;
     }
 
-    public BigDecimal getPriceUnity() {
-        return priceUnity;
+    public String getUnityPrice() {
+        return unityPrice;
     }
 
-    public IrExceltDto setPriceUnity(BigDecimal priceUnity) {
-        this.priceUnity = priceUnity;
+    public IrExceltDto setUnityPrice(String unityPrice) {
+        this.unityPrice = unityPrice;
+        return this;
+    }
+
+    public String getTotalPrice() {
+        return totalPrice;
+    }
+
+    public IrExceltDto setTotalPrice(String totalPrice) {
+        this.totalPrice = totalPrice;
         return this;
     }
 }
