@@ -18,8 +18,7 @@ public class IrController {
 
     @PostMapping("/v1/ir")
     public ResponseEntity sales(@RequestBody IrRequestDto requestDto) {
-        irService.calculateIr(requestDto);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(irService.calculateIr(requestDto));
     }
 
 }

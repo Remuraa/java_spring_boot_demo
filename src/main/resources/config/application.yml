@@ -1,0 +1,6 @@
+info:
+  version: '@project.version@'
+  modulo: '@project.name@'
+
+server:
+  port: 8888

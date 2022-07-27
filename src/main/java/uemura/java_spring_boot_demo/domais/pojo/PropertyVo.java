@@ -7,8 +7,9 @@ import java.math.RoundingMode;
 public class PropertyVo implements Serializable {
 
     private String product;
-    private BigDecimal quantity;
-    private BigDecimal totalPrice;
+    private BigDecimal quantity = BigDecimal.ZERO;
+    private BigDecimal quantityBuy = BigDecimal.ZERO;
+    private BigDecimal totalBuyPrice = BigDecimal.ZERO;
 
     public String getProduct() {
         return product;
@@ -33,22 +34,31 @@ public class PropertyVo implements Serializable {
         return this;
     }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public BigDecimal getQuantityBuy() {
+        return quantityBuy;
     }
 
-    public PropertyVo setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
+    public PropertyVo setQuantityBuy(BigDecimal quantityBuy) {
+        this.quantityBuy = quantityBuy;
+        return this;
+    }
+
+    public BigDecimal getTotalBuyPrice() {
+        return totalBuyPrice;
+    }
+
+    public PropertyVo setTotalBuyPrice(BigDecimal totalBuyPrice) {
+        this.totalBuyPrice = totalBuyPrice;
         return this;
     }
 
     public PropertyVo addTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = this.totalPrice.add(totalPrice);
+        this.totalBuyPrice = this.totalBuyPrice.add(totalPrice);
         return this;
     }
 
-    public BigDecimal getAveragePrice() {
-        return totalPrice.divide(quantity).setScale(2, RoundingMode.UP);
+    public BigDecimal getAveragePriceBuy() {
+        return totalBuyPrice.divide(quantity, 2, RoundingMode.UP);
     }
 
     @Override
@@ -56,7 +66,7 @@ public class PropertyVo implements Serializable {
         return "PropertyVo{" +
                 "product='" + product + '\'' +
                 ", quantity=" + quantity +
-                ", totalPrice=" + totalPrice +
+                ", totalPrice=" + totalBuyPrice +
                 '}';
     }
 }
