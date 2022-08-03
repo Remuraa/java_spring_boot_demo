@@ -8,8 +8,7 @@ public class PropertyVo implements Serializable {
 
     private String product;
     private BigDecimal quantity = BigDecimal.ZERO;
-    private BigDecimal quantityBuy = BigDecimal.ZERO;
-    private BigDecimal totalBuyPrice = BigDecimal.ZERO;
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
     public String getProduct() {
         return product;
@@ -34,31 +33,17 @@ public class PropertyVo implements Serializable {
         return this;
     }
 
-    public BigDecimal getQuantityBuy() {
-        return quantityBuy;
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
     }
 
-    public PropertyVo setQuantityBuy(BigDecimal quantityBuy) {
-        this.quantityBuy = quantityBuy;
-        return this;
-    }
-
-    public BigDecimal getTotalBuyPrice() {
-        return totalBuyPrice;
-    }
-
-    public PropertyVo setTotalBuyPrice(BigDecimal totalBuyPrice) {
-        this.totalBuyPrice = totalBuyPrice;
-        return this;
-    }
-
-    public PropertyVo addTotalPrice(BigDecimal totalPrice) {
-        this.totalBuyPrice = this.totalBuyPrice.add(totalPrice);
+    public PropertyVo setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
         return this;
     }
 
     public BigDecimal getAveragePriceBuy() {
-        return totalBuyPrice.divide(quantity, 2, RoundingMode.UP);
+        return totalPrice.divide(quantity, 2, RoundingMode.UP);
     }
 
     @Override
@@ -66,7 +51,7 @@ public class PropertyVo implements Serializable {
         return "PropertyVo{" +
                 "product='" + product + '\'' +
                 ", quantity=" + quantity +
-                ", totalPrice=" + totalBuyPrice +
+                ", totalPrice=" + totalPrice +
                 '}';
     }
 }
