@@ -64,7 +64,7 @@ public class StockPortfolioAnalyticalVo implements Serializable {
 
 
     public BigDecimal getAverageBuy() {
-        return totalPrice.divide(quantity, 2, RoundingMode.UP);
+        return quantity.compareTo(BigDecimal.ZERO)  == 0 ? BigDecimal.ZERO : totalPrice.divide(quantity, 2, RoundingMode.UP);
     }
 
     public BigDecimal getStockPortfolioQuantity() {
@@ -83,5 +83,18 @@ public class StockPortfolioAnalyticalVo implements Serializable {
     public StockPortfolioAnalyticalVo setStockPortfolioAveragePrice(BigDecimal stockPortfolioAveragePrice) {
         this.stockPortfolioAveragePrice = stockPortfolioAveragePrice;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "StockPortfolioAnalyticalVo{" +
+                "product='" + product + '\'' +
+                ", date=" + date +
+                ", typeMoviment=" + typeMoviment +
+                ", quantity=" + quantity +
+                ", totalPrice=" + totalPrice +
+                ", stockPortfolioQuantity=" + stockPortfolioQuantity +
+                ", stockPortfolioAveragePrice=" + stockPortfolioAveragePrice +
+                '}';
     }
 }
