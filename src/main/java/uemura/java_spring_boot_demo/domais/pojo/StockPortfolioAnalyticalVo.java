@@ -87,14 +87,12 @@ public class StockPortfolioAnalyticalVo implements Serializable {
 
     @Override
     public String toString() {
-        return "StockPortfolioAnalyticalVo{" +
-                "product='" + product + '\'' +
-                ", date=" + date +
-                ", typeMoviment=" + typeMoviment +
-                ", quantity=" + quantity +
-                ", totalPrice=" + totalPrice +
-                ", stockPortfolioQuantity=" + stockPortfolioQuantity +
-                ", stockPortfolioAveragePrice=" + stockPortfolioAveragePrice +
-                '}';
+        return date.toString() +
+                ";'" + product +
+                ";" + typeMoviment +
+                ";" + quantity +
+                ";" + totalPrice +
+                ";" + stockPortfolioQuantity +
+                ";" + stockPortfolioAveragePrice;
     }
 }

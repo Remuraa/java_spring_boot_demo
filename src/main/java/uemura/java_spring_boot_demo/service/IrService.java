@@ -11,6 +11,7 @@ import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
 import uemura.java_spring_boot_demo.domais.transfer.PropertyDto;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.enums.IrTypeMovimentEnum;
+import uemura.java_spring_boot_demo.enums.ProductEnum;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,11 +30,32 @@ public class IrService {
         try {
             List<IrExceltDto> irExceltDtos = ReadExcel.read(irDto.getUrlPath());
             List<Map<String, List<StockPortfolioAnalyticalVo>>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
-            return new IrResponseDto();
+
+            return new IrResponseDto()
+                    .setPropertys(maps
+                            .stream()
+                            .flatMap(map -> map
+                                    .values()
+                                    .stream())
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct,
+                                    LinkedHashMap::new,
+                                    Collectors.maxBy(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))))
+                            .values().stream()
+                            .map(Optional::get)
+                            .filter(stock -> stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) > 0)
+                            .map(this::propertyConverter)
+                            .collect(Collectors.toList()));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
         }
+    }
+    private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks){
+        return new PropertyDto()
+                .setProduct(stocks.getProduct())
+                .setQuantity(stocks.getStockPortfolioQuantity())
+                .setAveragePrice(stocks.getStockPortfolioAveragePrice());
     }
 
     private List<Map<String, List<StockPortfolioAnalyticalVo>>> calculatePortfolioAnalytical(List<IrExceltDto> irExceltDtos, List<PropertyDto> propertysLastYear) {
@@ -42,9 +64,7 @@ public class IrService {
                 .filter(ir -> IrMovimentEnum.LIQUIDATION.getValue().equals(ir.getMoviment()))
                 .collect(Collectors.groupingBy(d -> d.getDate().getMonth()));
 
-        Map<Month, List<IrExceltDto>> treeMapIrByMonth = new TreeMap<>(mapIrByMonth);
-
-        return treeMapIrByMonth
+        return mapIrByMonth
                 .entrySet()
                 .stream()
                 .map(entry -> {
@@ -54,7 +74,7 @@ public class IrService {
                         stockPortifolioLastyear = propertysLastYear
                                 .stream()
                                 .map(property -> new StockPortfolioAnalyticalVo()
-                                        .setProduct(property.getProduct())
+                                        .setProduct(ProductEnum.convertNameProduct(property.getProduct()))
                                         .setDate(LocalDate.of(2020, Month.DECEMBER, 31))
                                         .setQuantity(property.getQuantity())
                                         .setTotalPrice(property.getAveragePrice().multiply(property.getQuantity()))
@@ -67,7 +87,7 @@ public class IrService {
                                     entry.getValue()
                                             .stream()
                                             .map(ir -> new StockPortfolioAnalyticalVo()
-                                                    .setProduct(ir.getProduct().trim())
+                                                    .setProduct(ProductEnum.convertNameProduct(ir.getProduct()))
                                                     .setDate(ir.getDate())
                                                     .setTypeMoviment(IrTypeMovimentEnum.toEnum(ir.getTypeMoviment()))
                                                     .setQuantity(new BigDecimal(ir.getQuantity()))
