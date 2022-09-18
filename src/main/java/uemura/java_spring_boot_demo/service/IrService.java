@@ -29,14 +29,12 @@ public class IrService {
     public IrResponseDto calculateIr(IrRequestDto irDto) {
         try {
             List<IrExceltDto> irExceltDtos = ReadExcel.read(irDto.getUrlPath());
-            List<Map<String, List<StockPortfolioAnalyticalVo>>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
+            Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
 
             return new IrResponseDto()
                     .setPropertys(maps
+                            .values()
                             .stream()
-                            .flatMap(map -> map
-                                    .values()
-                                    .stream())
                             .flatMap(Collection::stream)
                             .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct,
                                     LinkedHashMap::new,
@@ -51,27 +49,28 @@ public class IrService {
             return null;
         }
     }
-    private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks){
+
+    private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks) {
         return new PropertyDto()
                 .setProduct(stocks.getProduct())
                 .setQuantity(stocks.getStockPortfolioQuantity())
                 .setAveragePrice(stocks.getStockPortfolioAveragePrice());
     }
 
-    private List<Map<String, List<StockPortfolioAnalyticalVo>>> calculatePortfolioAnalytical(List<IrExceltDto> irExceltDtos, List<PropertyDto> propertysLastYear) {
-        Map<Month, List<IrExceltDto>> mapIrByMonth = irExceltDtos
-                .stream()
-                .filter(ir -> IrMovimentEnum.LIQUIDATION.getValue().equals(ir.getMoviment()))
-                .collect(Collectors.groupingBy(d -> d.getDate().getMonth()));
+    private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<IrExceltDto> irExceltDtos, List<PropertyDto> propertysLastYear) {
 
-        return mapIrByMonth
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    LOGGER.info("Month: {}", entry.getKey());
-                    List<StockPortfolioAnalyticalVo> stockPortifolioLastyear = new ArrayList<>();
-                    if (Month.JANUARY.equals(entry.getKey())) {
-                        stockPortifolioLastyear = propertysLastYear
+        Map<String, List<StockPortfolioAnalyticalVo>> mapProductStock = Stream.concat(
+                        irExceltDtos
+                                .stream()
+                                .filter(ir -> IrMovimentEnum.LIQUIDATION.getValue().equals(ir.getMoviment()))
+                                .map(ir -> new StockPortfolioAnalyticalVo()
+                                        .setProduct(ProductEnum.convertNameProduct(ir.getProduct()))
+                                        .setDate(ir.getDate())
+                                        .setTypeMoviment(IrTypeMovimentEnum.toEnum(ir.getTypeMoviment()))
+                                        .setQuantity(new BigDecimal(ir.getQuantity()))
+                                        .setTotalPrice(new BigDecimal(ir.getTotalPrice()))
+                                ),
+                        propertysLastYear
                                 .stream()
                                 .map(property -> new StockPortfolioAnalyticalVo()
                                         .setProduct(ProductEnum.convertNameProduct(property.getProduct()))
@@ -79,52 +78,41 @@ public class IrService {
                                         .setQuantity(property.getQuantity())
                                         .setTotalPrice(property.getAveragePrice().multiply(property.getQuantity()))
                                         .setStockPortfolioQuantity(property.getQuantity())
-                                        .setStockPortfolioAveragePrice(property.getAveragePrice()))
-                                .collect(Collectors.toList());
-                    }
+                                        .setStockPortfolioAveragePrice(property.getAveragePrice())))
 
-                    Map<String, List<StockPortfolioAnalyticalVo>> maStockPortfolio = Stream.concat(
-                                    entry.getValue()
-                                            .stream()
-                                            .map(ir -> new StockPortfolioAnalyticalVo()
-                                                    .setProduct(ProductEnum.convertNameProduct(ir.getProduct()))
-                                                    .setDate(ir.getDate())
-                                                    .setTypeMoviment(IrTypeMovimentEnum.toEnum(ir.getTypeMoviment()))
-                                                    .setQuantity(new BigDecimal(ir.getQuantity()))
-                                                    .setTotalPrice(new BigDecimal(ir.getTotalPrice()))
-                                            ),
-                                    stockPortifolioLastyear.stream())
-                            .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct));
+                .sorted(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))
+                .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct));
 
-                    maStockPortfolio
-                            .entrySet()
-                            .stream()
-                            .forEach(entryStock -> {
-                                LOGGER.info(entryStock.getKey());
-                                StockPortfolioAnalyticalVo lastStockPortfolio = new StockPortfolioAnalyticalVo();
-                                entryStock.getValue()
-                                        .stream()
-                                        .sorted(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))
-                                        .forEach(stockPortfolio -> {
-                                            stockPortfolio
-                                                    .setStockPortfolioQuantity(
-                                                            IrTypeMovimentEnum.DEBIT.equals(stockPortfolio.getTypeMoviment()) ?
-                                                                    lastStockPortfolio.getStockPortfolioQuantity().subtract(stockPortfolio.getQuantity()) :
-                                                                    lastStockPortfolio.getStockPortfolioQuantity().add(stockPortfolio.getQuantity()))
-                                                    .setStockPortfolioAveragePrice(
-                                                            stockPortfolio.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
-                                                                    BigDecimal.ZERO :
-                                                                    IrTypeMovimentEnum.DEBIT.equals(stockPortfolio.getTypeMoviment()) ?
-                                                                            lastStockPortfolio.getStockPortfolioAveragePrice() :
-                                                                            lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stockPortfolio.getTotalPrice())
-                                                                                    .divide(stockPortfolio.getStockPortfolioQuantity(), 2, RoundingMode.UP));
-                                            lastStockPortfolio.setStockPortfolioAveragePrice(stockPortfolio.getStockPortfolioAveragePrice());
-                                            lastStockPortfolio.setStockPortfolioQuantity(stockPortfolio.getStockPortfolioQuantity());
-                                            LOGGER.info(stockPortfolio.toString());
-                                        });
+        mapProductStock
+                .entrySet()
+                .stream()
+                .forEach(entryStock -> {
+                    LOGGER.info(entryStock.getKey());
+                    StockPortfolioAnalyticalVo lastStockPortfolio = new StockPortfolioAnalyticalVo();
+                    entryStock.getValue()
+                            .forEach(stock -> {
+                                stock
+                                        .setStockPortfolioQuantity(
+                                                IrTypeMovimentEnum.DEBIT.equals(stock.getTypeMoviment()) ?
+                                                        lastStockPortfolio.getStockPortfolioQuantity().subtract(stock.getQuantity()) :
+                                                        lastStockPortfolio.getStockPortfolioQuantity().add(stock.getQuantity()))
+                                        .setStockPortfolioAveragePrice(
+                                                stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
+                                                        BigDecimal.ZERO :
+                                                        IrTypeMovimentEnum.DEBIT.equals(stock.getTypeMoviment()) ?
+                                                                lastStockPortfolio.getStockPortfolioAveragePrice() :
+                                                                lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stock.getTotalPrice())
+                                                                        .divide(stock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
+                                lastStockPortfolio.setStockPortfolioAveragePrice(stock.getStockPortfolioAveragePrice());
+                                lastStockPortfolio.setStockPortfolioQuantity(stock.getStockPortfolioQuantity());
+                                LOGGER.info(stock.toString());
                             });
-                    return maStockPortfolio;
-                }).collect(Collectors.toList());
-    }
+                });
 
+        return mapProductStock
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(d -> d.getDate().getMonth()));
+    }
 }
