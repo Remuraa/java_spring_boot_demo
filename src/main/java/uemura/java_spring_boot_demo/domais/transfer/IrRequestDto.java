@@ -5,15 +5,15 @@ import java.util.List;
 
 public class IrRequestDto implements Serializable {
 
-    private String urlPath;
+    private String nameFile;
     private List<PropertyDto> propertysLastYear;
 
-    public String getUrlPath() {
-        return urlPath;
+    public String getNameFile() {
+        return nameFile;
     }
 
-    public IrRequestDto setUrlPath(String urlPath) {
-        this.urlPath = urlPath;
+    public IrRequestDto setNameFile(String nameFile) {
+        this.nameFile = nameFile;
         return this;
     }
 

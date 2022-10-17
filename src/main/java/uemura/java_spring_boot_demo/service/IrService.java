@@ -2,6 +2,7 @@ package uemura.java_spring_boot_demo.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
@@ -24,11 +25,13 @@ import java.util.stream.Stream;
 @Service
 public class IrService {
 
+    @Value("${config.url-files}")
+    private String urlFiles;
     private static final Logger LOGGER = LoggerFactory.getLogger(IrService.class);
 
     public IrResponseDto calculateIr(IrRequestDto irDto) {
         try {
-            List<IrExceltDto> irExceltDtos = ReadExcel.read(irDto.getUrlPath());
+            List<IrExceltDto> irExceltDtos = ReadExcel.read(urlFiles + irDto.getNameFile());
             Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
 
             return new IrResponseDto()
