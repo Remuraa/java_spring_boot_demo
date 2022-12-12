@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
-import uemura.java_spring_boot_demo.domais.transfer.IrExceltDto;
-import uemura.java_spring_boot_demo.domais.transfer.IrRequestDto;
-import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
-import uemura.java_spring_boot_demo.domais.transfer.PropertyDto;
+import uemura.java_spring_boot_demo.domais.transfer.*;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.enums.IrTypeMovimentEnum;
 import uemura.java_spring_boot_demo.enums.ProductEnum;
@@ -34,23 +31,60 @@ public class IrService {
             List<IrExceltDto> irExceltDtos = ReadExcel.read(urlFiles + irDto.getNameFile());
             Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
 
-            return new IrResponseDto()
-                    .setPropertys(maps
-                            .values()
-                            .stream()
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct,
-                                    LinkedHashMap::new,
-                                    Collectors.maxBy(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))))
-                            .values().stream()
-                            .map(Optional::get)
-                            .filter(stock -> stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) > 0)
-                            .map(this::propertyConverter)
-                            .collect(Collectors.toList()));
+            IrResponseDto irResponseDto = new IrResponseDto()
+                    .setPropertys(getProperty(maps))
+                    .setProfitCalculation(getProfitCalculation(maps));
+            return irResponseDto
+                    .setLostCalculation(getLostCalculation(irResponseDto.getProfitCalculation()))
+                    .setAnnualIncome(getAnnualIncome(irResponseDto.getProfitCalculation()));
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
         }
+    }
+
+    private BigDecimal getAnnualIncome(List<ProfitCalculationDto> profitCalculation) {
+        return profitCalculation
+                .stream()
+                .map(ProfitCalculationDto::getValue)
+                .filter(value -> BigDecimal.ZERO.compareTo(value) < 0)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<ProfitCalculationDto> getLostCalculation(List<ProfitCalculationDto> profitCalculation) {
+        return null; //todo
+    }
+
+    private List<ProfitCalculationDto> getProfitCalculation(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
+        return maps
+                .entrySet()
+                .stream()
+                .map(entry -> entry.getValue()
+                        .stream()
+                        .filter(stockPortfolio -> IrTypeMovimentEnum.DEBIT.equals(stockPortfolio.getTypeMoviment()))
+                        .map(stockPortfolio -> new ProfitCalculationDto()
+                                .setProduct(stockPortfolio.getProduct())
+                                .setMonth(entry.getKey())
+                                .setValue(stockPortfolio.getTotalPrice().subtract(stockPortfolio.getQuantity().multiply(stockPortfolio.getStockPortfolioAveragePrice()))))
+                        .collect(Collectors.toList()))
+                .flatMap(Collection::stream)
+                .sorted(Comparator.comparing(ProfitCalculationDto::getMonth))
+                .collect(Collectors.toList());
+    }
+
+    private List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
+        return maps
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct,
+                        LinkedHashMap::new,
+                        Collectors.maxBy(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))))
+                .values().stream()
+                .map(Optional::get)
+                .filter(stock -> stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) > 0)
+                .map(this::propertyConverter)
+                .collect(Collectors.toList());
     }
 
     private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks) {
