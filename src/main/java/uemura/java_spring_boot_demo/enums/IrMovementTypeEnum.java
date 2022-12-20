@@ -2,15 +2,15 @@ package uemura.java_spring_boot_demo.enums;
 
 import java.util.Arrays;
 
-public enum IrTypeMovimentEnum {
+public enum IrMovementTypeEnum {
 
     CREDIT("Credito"),
     DEBIT("Debito"),
     ;
 
-    private String value;
+    private final String value;
 
-    IrTypeMovimentEnum(String value) {
+    IrMovementTypeEnum(String value) {
         this.value = value;
     }
 
@@ -18,7 +18,7 @@ public enum IrTypeMovimentEnum {
         return value;
     }
 
-    public static IrTypeMovimentEnum toEnum(String typeMoviment) {
+    public static IrMovementTypeEnum toEnum(String typeMoviment) {
         return Arrays.stream(values())
                 .filter(value -> value.getValue().equals(typeMoviment))
                 .findFirst()

@@ -8,7 +8,7 @@ import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
 import uemura.java_spring_boot_demo.domais.transfer.*;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
-import uemura.java_spring_boot_demo.enums.IrTypeMovimentEnum;
+import uemura.java_spring_boot_demo.enums.IrMovementTypeEnum;
 import uemura.java_spring_boot_demo.enums.ProductEnum;
 
 import java.math.BigDecimal;
@@ -61,7 +61,7 @@ public class IrService {
                 .stream()
                 .map(entry -> entry.getValue()
                         .stream()
-                        .filter(stockPortfolio -> IrTypeMovimentEnum.DEBIT.equals(stockPortfolio.getTypeMoviment()))
+                        .filter(stockPortfolio -> IrMovementTypeEnum.DEBIT.equals(stockPortfolio.getMovementType()))
                         .map(stockPortfolio -> new ProfitCalculationDto()
                                 .setProduct(stockPortfolio.getProduct())
                                 .setMonth(entry.getKey())
@@ -100,22 +100,26 @@ public class IrService {
                         irExceltDtos
                                 .stream()
                                 .filter(ir -> IrMovimentEnum.LIQUIDATION.getValue().equals(ir.getMoviment()))
-                                .map(ir -> new StockPortfolioAnalyticalVo()
-                                        .setProduct(ProductEnum.convertNameProduct(ir.getProduct()))
-                                        .setDate(ir.getDate())
-                                        .setTypeMoviment(IrTypeMovimentEnum.toEnum(ir.getTypeMoviment()))
-                                        .setQuantity(new BigDecimal(ir.getQuantity()))
-                                        .setTotalPrice(new BigDecimal(ir.getTotalPrice()))
+                                .map(ir -> StockPortfolioAnalyticalVo
+                                        .builder()
+                                        .product(ProductEnum.convertNameProduct(ir.getProduct()))
+                                        .date(ir.getDate())
+                                        .movementType(IrMovementTypeEnum.toEnum(ir.getTypeMoviment()))
+                                        .quantity(new BigDecimal(ir.getQuantity()))
+                                        .totalPrice(new BigDecimal(ir.getTotalPrice()))
+                                        .build()
                                 ),
                         propertysLastYear
                                 .stream()
-                                .map(property -> new StockPortfolioAnalyticalVo()
-                                        .setProduct(ProductEnum.convertNameProduct(property.getProduct()))
-                                        .setDate(LocalDate.of(2020, Month.DECEMBER, 31))
-                                        .setQuantity(property.getQuantity())
-                                        .setTotalPrice(property.getAveragePrice().multiply(property.getQuantity()))
-                                        .setStockPortfolioQuantity(property.getQuantity())
-                                        .setStockPortfolioAveragePrice(property.getAveragePrice())))
+                                .map(property -> StockPortfolioAnalyticalVo
+                                        .builder()
+                                        .product(ProductEnum.convertNameProduct(property.getProduct()))
+                                        .date(LocalDate.of(2020, Month.DECEMBER, 31))
+                                        .quantity(property.getQuantity())
+                                        .totalPrice(property.getAveragePrice().multiply(property.getQuantity()))
+                                        .stockPortfolioQuantity(property.getQuantity())
+                                        .stockPortfolioAveragePrice(property.getAveragePrice())
+                                        .build()))
 
                 .sorted(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))
                 .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct));
@@ -125,21 +129,20 @@ public class IrService {
                 .stream()
                 .forEach(entryStock -> {
                     LOGGER.info(entryStock.getKey());
-                    StockPortfolioAnalyticalVo lastStockPortfolio = new StockPortfolioAnalyticalVo();
+                    StockPortfolioAnalyticalVo lastStockPortfolio = StockPortfolioAnalyticalVo.builder().build();
                     entryStock.getValue()
                             .forEach(stock -> {
-                                stock
-                                        .setStockPortfolioQuantity(
-                                                IrTypeMovimentEnum.DEBIT.equals(stock.getTypeMoviment()) ?
-                                                        lastStockPortfolio.getStockPortfolioQuantity().subtract(stock.getQuantity()) :
-                                                        lastStockPortfolio.getStockPortfolioQuantity().add(stock.getQuantity()))
-                                        .setStockPortfolioAveragePrice(
-                                                stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
-                                                        BigDecimal.ZERO :
-                                                        IrTypeMovimentEnum.DEBIT.equals(stock.getTypeMoviment()) ?
-                                                                lastStockPortfolio.getStockPortfolioAveragePrice() :
-                                                                lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stock.getTotalPrice())
-                                                                        .divide(stock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
+                                stock.setStockPortfolioQuantity(
+                                        IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
+                                                lastStockPortfolio.getStockPortfolioQuantity().subtract(stock.getQuantity()) :
+                                                lastStockPortfolio.getStockPortfolioQuantity().add(stock.getQuantity()));
+                                stock.setStockPortfolioAveragePrice(
+                                        stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
+                                                BigDecimal.ZERO :
+                                                IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
+                                                        lastStockPortfolio.getStockPortfolioAveragePrice() :
+                                                        lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stock.getTotalPrice())
+                                                                .divide(stock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
                                 lastStockPortfolio.setStockPortfolioAveragePrice(stock.getStockPortfolioAveragePrice());
                                 lastStockPortfolio.setStockPortfolioQuantity(stock.getStockPortfolioQuantity());
                                 LOGGER.info(stock.toString());

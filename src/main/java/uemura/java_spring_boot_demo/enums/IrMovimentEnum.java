@@ -8,7 +8,7 @@ public enum IrMovimentEnum {
     INTEREST_ON_EQUITY("Juros Sobre Capital Próprio"),
     ;
 
-    private String value;
+    private final String value;
 
     IrMovimentEnum(String value) {
         this.value = value;
