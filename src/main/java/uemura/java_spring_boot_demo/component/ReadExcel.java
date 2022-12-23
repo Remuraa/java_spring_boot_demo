@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ReadExcel {
 
-    public static List<IrExceltDto> read(String filePath) throws Exception {
+    public static List<IrExceltDto> read(String filePath) {
         PoijiOptions options = PoijiOptions.PoijiOptionsBuilder.settings().build();
         return Poiji.fromExcel(new File(filePath), IrExceltDto.class, options);
     }

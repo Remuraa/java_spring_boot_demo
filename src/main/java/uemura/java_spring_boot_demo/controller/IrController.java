@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uemura.java_spring_boot_demo.domais.transfer.IrRequestDto;
+import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
 import uemura.java_spring_boot_demo.service.IrService;
 
 @RestController
@@ -17,7 +18,7 @@ public class IrController {
     private IrService irService;
 
     @PostMapping("/v1/ir")
-    public ResponseEntity sales(@RequestBody IrRequestDto requestDto) {
+    public ResponseEntity<IrResponseDto> sales(@RequestBody IrRequestDto requestDto) {
         return ResponseEntity.ok(irService.calculateIr(requestDto));
     }
 

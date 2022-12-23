@@ -21,9 +21,13 @@ public class StockPortfolioAnalyticalVo implements Serializable {
     private String product;
     private LocalDate date;
     private IrMovementTypeEnum movementType;
+    @Builder.Default
     private BigDecimal quantity = BigDecimal.ZERO;
+    @Builder.Default
     private BigDecimal totalPrice = BigDecimal.ZERO;
+    @Builder.Default
     private BigDecimal stockPortfolioQuantity = BigDecimal.ZERO;
+    @Builder.Default
     private BigDecimal stockPortfolioAveragePrice = BigDecimal.ZERO;
 
 }

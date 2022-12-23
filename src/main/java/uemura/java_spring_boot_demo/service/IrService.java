@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
 import uemura.java_spring_boot_demo.domais.transfer.*;
-import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.enums.IrMovementTypeEnum;
+import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.enums.ProductEnum;
 
 import java.math.BigDecimal;
@@ -30,13 +30,14 @@ public class IrService {
         try {
             List<IrExceltDto> irExceltDtos = ReadExcel.read(urlFiles + irDto.getNameFile());
             Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
+            List<ProfitCalculationDto> profitCalculation = getProfitCalculation(maps);
 
-            IrResponseDto irResponseDto = new IrResponseDto()
-                    .setPropertys(getProperty(maps))
-                    .setProfitCalculation(getProfitCalculation(maps));
-            return irResponseDto
-                    .setLostCalculation(getLostCalculation(irResponseDto.getProfitCalculation()))
-                    .setAnnualIncome(getAnnualIncome(irResponseDto.getProfitCalculation()));
+            return IrResponseDto.builder()
+                    .propertys(getProperty(maps))
+                    .profitCalculation(profitCalculation)
+                    .lostCalculation(getLostCalculation(profitCalculation))
+                    .annualIncome(getAnnualIncome(profitCalculation))
+                    .build();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
@@ -62,10 +63,11 @@ public class IrService {
                 .map(entry -> entry.getValue()
                         .stream()
                         .filter(stockPortfolio -> IrMovementTypeEnum.DEBIT.equals(stockPortfolio.getMovementType()))
-                        .map(stockPortfolio -> new ProfitCalculationDto()
-                                .setProduct(stockPortfolio.getProduct())
-                                .setMonth(entry.getKey())
-                                .setValue(stockPortfolio.getTotalPrice().subtract(stockPortfolio.getQuantity().multiply(stockPortfolio.getStockPortfolioAveragePrice()))))
+                        .map(stockPortfolio -> ProfitCalculationDto.builder()
+                                .product(stockPortfolio.getProduct())
+                                .month(entry.getKey())
+                                .value(stockPortfolio.getTotalPrice().subtract(stockPortfolio.getQuantity().multiply(stockPortfolio.getStockPortfolioAveragePrice())))
+                                .build())
                         .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(ProfitCalculationDto::getMonth))
@@ -88,10 +90,11 @@ public class IrService {
     }
 
     private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks) {
-        return new PropertyDto()
-                .setProduct(stocks.getProduct())
-                .setQuantity(stocks.getStockPortfolioQuantity())
-                .setAveragePrice(stocks.getStockPortfolioAveragePrice());
+        return PropertyDto.builder()
+                .product(stocks.getProduct())
+                .quantity(stocks.getStockPortfolioQuantity())
+                .averagePrice(stocks.getStockPortfolioAveragePrice())
+                .build();
     }
 
     private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<IrExceltDto> irExceltDtos, List<PropertyDto> propertysLastYear) {
