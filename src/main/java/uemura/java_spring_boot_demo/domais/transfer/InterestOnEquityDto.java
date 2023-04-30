@@ -14,11 +14,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PropertyDto implements Serializable {
+public class InterestOnEquityDto implements Serializable {
 
     private String product;
-    private BigDecimal quantity;
-    private BigDecimal averagePrice;
-    private BigDecimal totalPrice;
+    private BigDecimal value;
 
 }

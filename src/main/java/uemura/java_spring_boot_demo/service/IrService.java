@@ -29,6 +29,7 @@ public class IrService {
     public IrResponseDto calculateIr(IrRequestDto irDto) {
         try {
             List<IrExceltDto> irExceltDtos = ReadExcel.read(urlFiles + irDto.getNameFile());
+
             Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto.getPropertysLastYear());
             List<ProfitCalculationDto> profitCalculation = getProfitCalculation(maps);
 
@@ -37,11 +38,58 @@ public class IrService {
                     .profitCalculation(profitCalculation)
                     .lostCalculation(getLostCalculation(profitCalculation))
                     .annualIncome(getAnnualIncome(profitCalculation))
+                    .earningsAndDividendsReceived(getEarningsAndDividendsReceived(irExceltDtos))
+                    .interestOnEquity(getInterestOnEquity(irExceltDtos))
                     .build();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             return null;
         }
+    }
+
+    private List<InterestOnEquityDto> getInterestOnEquity(List<IrExceltDto> irExceltDtos) {
+        return irExceltDtos
+                .stream()
+                .filter(ir -> IrMovimentEnum.INTEREST_ON_EQUITY.getValue().equals(ir.getMoviment()))
+                .map(ir -> InterestOnEquityDto
+                        .builder()
+                        .product(ProductEnum.convertNameProduct(ir.getProduct()))
+                        .value(new BigDecimal(ir.getTotalPrice().replace("R$", "").trim()))
+                        .build()
+                ).collect(Collectors.groupingBy(InterestOnEquityDto::getProduct,
+                        Collectors.reducing(BigDecimal.ZERO, InterestOnEquityDto::getValue, BigDecimal::add)))
+                .entrySet()
+                .stream()
+                .map(entry -> InterestOnEquityDto
+                        .builder()
+                        .product(entry.getKey())
+                        .value(entry.getValue())
+                        .build())
+                .sorted(Comparator.comparing(InterestOnEquityDto::getProduct))
+                .collect(Collectors.toList());
+    }
+
+    private List<EarningsAndDividendsDto> getEarningsAndDividendsReceived(List<IrExceltDto> irExceltDtos) {
+        return irExceltDtos
+                .stream()
+                .filter(ir -> IrMovimentEnum.DIVIDEND.getValue().equals(ir.getMoviment()))
+                .map(ir -> EarningsAndDividendsDto
+                        .builder()
+                        .product(ProductEnum.convertNameProduct(ir.getProduct()))
+                        .value(new BigDecimal(ir.getTotalPrice().replace("R$", "").trim()))
+                        .build()
+                ).collect(Collectors.groupingBy(EarningsAndDividendsDto::getProduct,
+                        Collectors.reducing(BigDecimal.ZERO, EarningsAndDividendsDto::getValue, BigDecimal::add)))
+                .entrySet()
+                .stream()
+                .map(entry -> EarningsAndDividendsDto
+                        .builder()
+                        .product(entry.getKey())
+                        .value(entry.getValue())
+                        .build())
+                .sorted(Comparator.comparing(EarningsAndDividendsDto::getProduct))
+                .collect(Collectors.toList());
+
     }
 
     private BigDecimal getAnnualIncome(List<ProfitCalculationDto> profitCalculation) {
@@ -75,7 +123,7 @@ public class IrService {
     }
 
     private List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
-        return maps
+        List<PropertyDto> collect = maps
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
@@ -86,7 +134,11 @@ public class IrService {
                 .map(Optional::get)
                 .filter(stock -> stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) > 0)
                 .map(this::propertyConverter)
+                .sorted(Comparator.comparing(PropertyDto::getProduct))
                 .collect(Collectors.toList());
+        collect.stream()
+                .forEach(stock -> stock.setTotalPrice(stock.getQuantity().multiply(stock.getAveragePrice())));
+        return collect;
     }
 
     private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks) {
@@ -99,7 +151,7 @@ public class IrService {
 
     private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<IrExceltDto> irExceltDtos, List<PropertyDto> propertysLastYear) {
 
-        Map<String, List<StockPortfolioAnalyticalVo>> mapProductStock = Stream.concat(
+        return Stream.concat(
                         irExceltDtos
                                 .stream()
                                 .filter(ir -> IrMovimentEnum.LIQUIDATION.getValue().equals(ir.getMoviment()))
@@ -109,7 +161,7 @@ public class IrService {
                                         .date(ir.getDate())
                                         .movementType(IrMovementTypeEnum.toEnum(ir.getTypeMoviment()))
                                         .quantity(new BigDecimal(ir.getQuantity()))
-                                        .totalPrice(new BigDecimal(ir.getTotalPrice()))
+                                        .totalPrice(new BigDecimal(ir.getTotalPrice().replace("R$", "").replace(",", "").trim()))
                                         .build()
                                 ),
                         propertysLastYear
@@ -125,37 +177,32 @@ public class IrService {
                                         .build()))
 
                 .sorted(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))
-                .collect(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct));
-
-        mapProductStock
-                .entrySet()
-                .stream()
-                .forEach(entryStock -> {
-                    LOGGER.info(entryStock.getKey());
-                    StockPortfolioAnalyticalVo lastStockPortfolio = StockPortfolioAnalyticalVo.builder().build();
-                    entryStock.getValue()
-                            .forEach(stock -> {
-                                stock.setStockPortfolioQuantity(
-                                        IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
-                                                lastStockPortfolio.getStockPortfolioQuantity().subtract(stock.getQuantity()) :
-                                                lastStockPortfolio.getStockPortfolioQuantity().add(stock.getQuantity()));
-                                stock.setStockPortfolioAveragePrice(
-                                        stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
-                                                BigDecimal.ZERO :
-                                                IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
-                                                        lastStockPortfolio.getStockPortfolioAveragePrice() :
-                                                        lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stock.getTotalPrice())
-                                                                .divide(stock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
-                                lastStockPortfolio.setStockPortfolioAveragePrice(stock.getStockPortfolioAveragePrice());
-                                lastStockPortfolio.setStockPortfolioQuantity(stock.getStockPortfolioQuantity());
-                                LOGGER.info(stock.toString());
-                            });
-                });
-
-        return mapProductStock
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(d -> d.getDate().getMonth()));
+                .collect(Collectors.collectingAndThen(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct),
+                        mapProductStock -> mapProductStock
+                                .entrySet()
+                                .stream()
+                                .flatMap(entryStock -> {
+                                    LOGGER.info(entryStock.getKey());
+                                    StockPortfolioAnalyticalVo lastStockPortfolio = StockPortfolioAnalyticalVo.builder().build();
+                                    return entryStock.getValue()
+                                            .stream().map(stock -> {
+                                                stock.setStockPortfolioQuantity(
+                                                        IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
+                                                                lastStockPortfolio.getStockPortfolioQuantity().subtract(stock.getQuantity()) :
+                                                                lastStockPortfolio.getStockPortfolioQuantity().add(stock.getQuantity()));
+                                                stock.setStockPortfolioAveragePrice(
+                                                        stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
+                                                                BigDecimal.ZERO :
+                                                                IrMovementTypeEnum.DEBIT.equals(stock.getMovementType()) ?
+                                                                        lastStockPortfolio.getStockPortfolioAveragePrice() :
+                                                                        lastStockPortfolio.getStockPortfolioAveragePrice().multiply(lastStockPortfolio.getStockPortfolioQuantity()).add(stock.getTotalPrice())
+                                                                                .divide(stock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
+                                                lastStockPortfolio.setStockPortfolioAveragePrice(stock.getStockPortfolioAveragePrice());
+                                                lastStockPortfolio.setStockPortfolioQuantity(stock.getStockPortfolioQuantity());
+                                                LOGGER.info(stock.toString());
+                                                return stock;
+                                            });
+                                })
+                                .collect(Collectors.groupingBy(d -> d.getDate().getMonth()))));
     }
 }

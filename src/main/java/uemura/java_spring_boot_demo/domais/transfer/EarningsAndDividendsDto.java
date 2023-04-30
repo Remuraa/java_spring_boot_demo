@@ -8,17 +8,16 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Month;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PropertyDto implements Serializable {
+public class EarningsAndDividendsDto implements Serializable {
 
     private String product;
-    private BigDecimal quantity;
-    private BigDecimal averagePrice;
-    private BigDecimal totalPrice;
+    private BigDecimal value;
 
 }

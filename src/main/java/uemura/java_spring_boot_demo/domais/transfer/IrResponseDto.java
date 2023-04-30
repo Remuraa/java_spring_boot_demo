@@ -22,5 +22,7 @@ public class IrResponseDto implements Serializable {
     private List<ProfitCalculationDto> lostCalculation;
     private BigDecimal annualIncome;
     private String moviments;
+    private List<EarningsAndDividendsDto> earningsAndDividendsReceived;
+    private List<InterestOnEquityDto> interestOnEquity;
 
 }
