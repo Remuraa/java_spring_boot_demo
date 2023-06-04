@@ -17,6 +17,7 @@ import java.util.List;
 public class IrRequestDto implements Serializable {
 
     private String nameFile;
+    private int year;
     private List<PropertyDto> propertysLastYear;
 
 }
