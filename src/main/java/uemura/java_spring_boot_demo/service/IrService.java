@@ -10,6 +10,7 @@ import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.domais.transfer.IrExceltDto;
 import uemura.java_spring_boot_demo.domais.transfer.IrRequestDto;
 import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
+import uemura.java_spring_boot_demo.repository.PropertyRepository;
 
 import java.util.List;
 
@@ -21,8 +22,11 @@ public class IrService {
     @Value("${config.url-files}")
     private String urlFiles;
 
+
     @Autowired
     private IrBuilder irBuilder;
+    @Autowired
+    private PropertyRepository propertyRepository;
 
     public IrResponseDto calculateIr(IrRequestDto irDto) {
         try {

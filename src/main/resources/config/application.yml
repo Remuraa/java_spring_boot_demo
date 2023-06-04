@@ -7,3 +7,7 @@ server:
 
 config:
   url-files: 'C:\Users\renan\Downloads\'
+  datasource:
+      url: localhost
+      username: root
+      password: root
