@@ -7,12 +7,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.component.IrBuilder;
 import uemura.java_spring_boot_demo.component.ReadExcel;
+import uemura.java_spring_boot_demo.converter.MovimentConverter;
+import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
 import uemura.java_spring_boot_demo.domais.transfer.IrExceltDto;
 import uemura.java_spring_boot_demo.domais.transfer.IrRequestDto;
 import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
 import uemura.java_spring_boot_demo.repository.PropertyRepository;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class IrService {
@@ -39,4 +43,18 @@ public class IrService {
         }
     }
 
+    public void importIr(String pathFile) {
+        List<MovimentEntity> movimentEntities = ReadExcel.read(urlFiles + pathFile)
+                .stream()
+                .map(MovimentConverter::converter)
+                .filter(movimentEntity -> Objects.nonNull(movimentEntity.getMoviment()))
+                .collect(Collectors.toList());
+        propertyRepository.saveAll(movimentEntities);
+
+        movimentEntities
+                .forEach(movimentEntity -> {
+                    LOGGER.info(movimentEntity.getProduct() + " " + movimentEntity.getDate());
+                    propertyRepository.save(movimentEntity);
+                });
+    }
 }

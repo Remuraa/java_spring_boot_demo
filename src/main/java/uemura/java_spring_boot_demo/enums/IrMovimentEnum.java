@@ -1,5 +1,7 @@
 package uemura.java_spring_boot_demo.enums;
 
+import java.util.Arrays;
+
 public enum IrMovimentEnum {
 
     LIQUIDATION("Transferência - Liquidação"),
@@ -16,5 +18,12 @@ public enum IrMovimentEnum {
 
     public String getValue() {
         return value;
+    }
+
+    public static IrMovimentEnum toEnum(String valueIr) {
+        return Arrays.stream(values())
+                .filter(value -> value.getValue().equals(valueIr))
+                .findFirst()
+                .orElse(null);
     }
 }
