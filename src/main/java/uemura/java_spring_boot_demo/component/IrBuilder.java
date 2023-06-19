@@ -114,7 +114,7 @@ public class IrBuilder {
                 .collect(Collectors.toList());
     }
 
-    private List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
+    public List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
         List<PropertyDto> collect = maps
                 .values()
                 .stream()

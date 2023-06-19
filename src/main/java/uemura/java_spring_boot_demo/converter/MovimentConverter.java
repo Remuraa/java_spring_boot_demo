@@ -18,7 +18,7 @@ public class MovimentConverter {
         LOGGER.info("Converter {} to MovimentEntity", irExceltDto );
         return MovimentEntity.builder()
                 .typeMoviment(IrMovementTypeEnum.toEnum(irExceltDto.getTypeMoviment()))
-                .date(irExceltDto.getDate())
+                .movimentDate(irExceltDto.getDate())
                 .moviment(IrMovimentEnum.toEnum(irExceltDto.getMoviment()))
                 .product(ProductEnum.convertNameProduct(irExceltDto.getProduct()))
                 .institution(irExceltDto.getInstitution())

@@ -10,6 +10,10 @@ config:
 
 spring:
   jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
   datasource:

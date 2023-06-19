@@ -23,10 +23,12 @@ public class MovimentEntity implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int id;
+    @Enumerated(EnumType.STRING)
     @Column
     private IrMovementTypeEnum typeMoviment;
     @Column
-    private LocalDate date;
+    private LocalDate movimentDate;
+    @Enumerated(EnumType.STRING)
     @Column
     private IrMovimentEnum moviment;
     @Column
