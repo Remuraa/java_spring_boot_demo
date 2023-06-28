@@ -3,10 +3,7 @@ package uemura.java_spring_boot_demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uemura.java_spring_boot_demo.domais.transfer.IrPropertiesResponseDto;
-import uemura.java_spring_boot_demo.domais.transfer.IrRequestDto;
-import uemura.java_spring_boot_demo.domais.transfer.IrResponseDto;
-import uemura.java_spring_boot_demo.domais.transfer.PropetiesRequestDto;
+import uemura.java_spring_boot_demo.domais.transfer.*;
 import uemura.java_spring_boot_demo.service.IrService;
 
 @RestController
@@ -29,6 +26,12 @@ public class IrController {
     @PostMapping("/v1/ir/import/{pathFile}")
     public ResponseEntity<Void> importIr(@PathVariable String pathFile) {
         irService.importIr(pathFile);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/v1/ir/property")
+    public ResponseEntity<Void> saveProperty(@PathVariable PropertyRequestDto propertyRequestDto) {
+        irService.saveProperty(propertyRequestDto);
         return ResponseEntity.noContent().build();
     }
 

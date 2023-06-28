@@ -7,19 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PropertyDto implements Serializable {
+public class PropertyRequestDto implements Serializable {
 
-    private int year;
-    private String product;
-    private BigDecimal quantity;
-    private BigDecimal averagePrice;
-    private BigDecimal totalPrice;
-
+    List<PropertyDto> properties;
 }

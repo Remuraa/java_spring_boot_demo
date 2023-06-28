@@ -3,6 +3,7 @@ package uemura.java_spring_boot_demo.component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
 import uemura.java_spring_boot_demo.domais.transfer.*;
 import uemura.java_spring_boot_demo.enums.IrMovementTypeEnum;
@@ -157,6 +158,66 @@ public class IrBuilder {
                                         .build()
                                 ),
                         irDto.getPropertysLastYear()
+                                .stream()
+                                .map(property -> StockPortfolioAnalyticalVo
+                                        .builder()
+                                        .product(ProductEnum.convertNameProduct(property.getProduct()))
+                                        .date(LocalDate.of(irDto.getYear() - 1, Month.DECEMBER, 31))
+                                        .quantity(property.getQuantity())
+                                        .totalPrice(property.getAveragePrice().multiply(property.getQuantity()))
+                                        .stockPortfolioQuantity(property.getQuantity())
+                                        .stockPortfolioAveragePrice(property.getAveragePrice())
+                                        .build()))
+                .sorted(Comparator.comparing(StockPortfolioAnalyticalVo::getDate))
+                .collect(Collectors.collectingAndThen(Collectors.groupingBy(StockPortfolioAnalyticalVo::getProduct),
+                        mapProductStock -> mapProductStock
+                                .entrySet()
+                                .stream()
+                                .flatMap(entryStock -> {
+                                    LOGGER.info(entryStock.getKey());
+                                    return IntStream.range(0, entryStock.getValue().size())
+                                            .mapToObj(index -> {
+                                                StockPortfolioAnalyticalVo lastStock = index == 0 ? StockPortfolioAnalyticalVo.builder().build() : entryStock.getValue().get(index - 1);
+                                                StockPortfolioAnalyticalVo currentStock = entryStock.getValue().get(index);
+
+                                                currentStock.setStockPortfolioQuantity(
+                                                        IrMovementTypeEnum.DEBIT.equals(currentStock.getMovementType()) ?
+                                                                lastStock.getStockPortfolioQuantity().subtract(currentStock.getQuantity()) :
+                                                                lastStock.getStockPortfolioQuantity().add(currentStock.getQuantity()));
+                                                currentStock.setStockPortfolioAveragePrice(
+                                                        currentStock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
+                                                                BigDecimal.ZERO :
+                                                                IrMovementTypeEnum.DEBIT.equals(currentStock.getMovementType()) ?
+                                                                        lastStock.getStockPortfolioAveragePrice() :
+                                                                        lastStock.getStockPortfolioAveragePrice().multiply(lastStock.getStockPortfolioQuantity()).add(currentStock.getTotalPrice())
+                                                                                .divide(currentStock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
+                                                return currentStock;
+                                            });
+                                })
+                                .collect(Collectors.groupingBy(d -> d.getDate().getMonth()))));
+    }
+
+    public List<PropertyDto> getProperty(List<MovimentEntity> moviments, PropetiesRequestDto requestDto) {
+        Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(moviments, requestDto);
+
+        return getProperty(maps);
+    }
+
+    private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<MovimentEntity> irExceltDtos, PropetiesRequestDto irDto) {
+
+        return Stream.concat(
+                        irExceltDtos
+                                .stream()
+                                .map(ir -> StockPortfolioAnalyticalVo
+                                        .builder()
+                                        .product(ir.getProduct())
+                                        .date(ir.getMovimentDate())
+                                        .movementType(ir.getTypeMoviment())
+                                        .quantity(ir.getQuantity())
+                                        .totalPrice(ir.getTotalPrice())
+                                        .build()
+                                ),
+                        irDto.getPropertiesLastYear()
                                 .stream()
                                 .map(property -> StockPortfolioAnalyticalVo
                                         .builder()
