@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
+import uemura.java_spring_boot_demo.domais.entity.PropertyEntity;
 import uemura.java_spring_boot_demo.domais.pojo.StockPortfolioAnalyticalVo;
 import uemura.java_spring_boot_demo.domais.transfer.*;
 import uemura.java_spring_boot_demo.enums.IrMovementTypeEnum;
@@ -197,13 +198,13 @@ public class IrBuilder {
                                 .collect(Collectors.groupingBy(d -> d.getDate().getMonth()))));
     }
 
-    public List<PropertyDto> getProperty(List<MovimentEntity> moviments, PropetiesRequestDto requestDto) {
-        Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(moviments, requestDto);
+    public List<PropertyDto> getProperty(List<MovimentEntity> moviments, List<PropertyEntity> propertiesLastYear) {
+        Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(moviments, propertiesLastYear);
 
         return getProperty(maps);
     }
 
-    private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<MovimentEntity> irExceltDtos, PropetiesRequestDto irDto) {
+    private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<MovimentEntity> irExceltDtos, List<PropertyEntity> propertiesLastYear) {
 
         return Stream.concat(
                         irExceltDtos
@@ -217,12 +218,12 @@ public class IrBuilder {
                                         .totalPrice(ir.getTotalPrice())
                                         .build()
                                 ),
-                        irDto.getPropertiesLastYear()
+                        propertiesLastYear
                                 .stream()
                                 .map(property -> StockPortfolioAnalyticalVo
                                         .builder()
                                         .product(ProductEnum.convertNameProduct(property.getProduct()))
-                                        .date(LocalDate.of(irDto.getYear() - 1, Month.DECEMBER, 31))
+                                        .date(LocalDate.of(property.getYear(), Month.DECEMBER, 31))
                                         .quantity(property.getQuantity())
                                         .totalPrice(property.getAveragePrice().multiply(property.getQuantity()))
                                         .stockPortfolioQuantity(property.getQuantity())

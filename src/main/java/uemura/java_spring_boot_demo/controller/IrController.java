@@ -18,9 +18,9 @@ public class IrController {
         return ResponseEntity.ok(irService.calculateIr(requestDto));
     }
 
-    @GetMapping("/v1/ir/properties")
-    public ResponseEntity<IrPropertiesResponseDto> properties(@RequestBody PropetiesRequestDto requestDto) {
-        return ResponseEntity.ok(irService.getProperties(requestDto));
+    @GetMapping("/v1/ir/properties/{year}")
+    public ResponseEntity<IrPropertiesResponseDto> properties(@PathVariable int year) {
+        return ResponseEntity.ok(irService.getProperties(year));
     }
 
     @PostMapping("/v1/ir/import/{pathFile}")
@@ -30,7 +30,7 @@ public class IrController {
     }
 
     @PostMapping("/v1/ir/property")
-    public ResponseEntity<Void> saveProperty(@PathVariable PropertyRequestDto propertyRequestDto) {
+    public ResponseEntity<Void> saveProperty(@RequestBody PropertyRequestDto propertyRequestDto) {
         irService.saveProperty(propertyRequestDto);
         return ResponseEntity.noContent().build();
     }

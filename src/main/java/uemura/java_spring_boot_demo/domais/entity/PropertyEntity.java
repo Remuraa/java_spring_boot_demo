@@ -27,7 +27,6 @@ public class PropertyEntity implements Serializable {
     @Column
     private BigDecimal averagePrice;
     @Column
-    private BigDecimal totalPrice;
-
+    private int year;
 
 }

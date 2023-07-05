@@ -61,13 +61,14 @@ public class IrService {
         movimentRepository.saveAll(movimentEntities);
     }
 
-    public IrPropertiesResponseDto getProperties(PropetiesRequestDto requestDto) {
-        LocalDate firstDayOfYear = LocalDate.of(requestDto.getYear(), Month.JANUARY, 1);
+    public IrPropertiesResponseDto getProperties(int year) {
+        LocalDate firstDayOfYear = LocalDate.of(year, Month.JANUARY, 1);
         LocalDate lasDayOfYear = firstDayOfYear.with(TemporalAdjusters.lastDayOfYear());
         List<MovimentEntity> moviments = movimentRepository.findAllByMovimentDateBetweenAndMoviment(firstDayOfYear, lasDayOfYear, IrMovimentEnum.LIQUIDATION);
+        List<PropertyEntity> propertiesLastYear = propertyRepository.findAllByYear(year-1);
 
         return IrPropertiesResponseDto.builder()
-                .properties(irBuilder.getProperty(moviments, requestDto))
+                .properties(irBuilder.getProperty(moviments, propertiesLastYear))
                 .build();
     }
 
