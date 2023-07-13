@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.config.handler;
+package uemura.java_spring_boot_demo.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
