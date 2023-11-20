@@ -15,6 +15,7 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>19</java.version>
+        <revision>1.0.0</revision>
     </properties>
     <dependencies>
         <dependency>
