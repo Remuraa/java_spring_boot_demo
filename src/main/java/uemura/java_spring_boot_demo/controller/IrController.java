@@ -41,4 +41,9 @@ public class IrController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/v1/ir")
+    public ResponseEntity<Void> deleteProperty() {
+        importPropertyService.deleteAll();
+        return ResponseEntity.noContent().build();
+    }
 }

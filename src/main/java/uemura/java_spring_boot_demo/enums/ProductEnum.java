@@ -32,7 +32,17 @@ public enum ProductEnum {
     IRDM11,
     BRKM5,
     VALE3,
-    KLBN11
+    KLBN11,
+    BBSE3,
+    CPLE3,
+    ENAT3,
+    HCTR11,
+    PMAM3,
+    SAPR4,
+    SBSP3,
+    TAEE4,
+    TRPL4,
+    BHIA3
     ;
 
     public static String convertNameProduct(String productDescription){

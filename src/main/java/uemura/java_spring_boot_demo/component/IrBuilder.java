@@ -25,13 +25,14 @@ public class IrBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IrBuilder.class);
 
+    //TODO REMOVE
     public IrResponseDto getResponse(IrRequestDto irDto, List<IrExceltDto> irExceltDtos) {
 
         Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(irExceltDtos, irDto);
         List<ProfitCalculationDto> profitCalculation = getProfitCalculation(maps);
 
         return IrResponseDto.builder()
-                .propertys(getProperty(maps))
+                .propertys(getProperty(maps, 2021))
                 .profitCalculation(profitCalculation)
                 .lostCalculation(getLostCalculation(profitCalculation))
                 .annualIncome(getAnnualIncome(profitCalculation))
@@ -116,7 +117,7 @@ public class IrBuilder {
                 .collect(Collectors.toList());
     }
 
-    public List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps) {
+    public List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps, int year) {
         List<PropertyDto> collect = maps
                 .values()
                 .stream()
@@ -127,7 +128,7 @@ public class IrBuilder {
                 .values().stream()
                 .map(Optional::get)
                 .filter(stock -> stock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) > 0)
-                .map(this::propertyConverter)
+                .map(property -> propertyConverter(property, year))
                 .sorted(Comparator.comparing(PropertyDto::getProduct))
                 .collect(Collectors.toList());
         collect.stream()
@@ -135,8 +136,9 @@ public class IrBuilder {
         return collect;
     }
 
-    private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks) {
+    private PropertyDto propertyConverter(StockPortfolioAnalyticalVo stocks, int year) {
         return PropertyDto.builder()
+                .year(year)
                 .product(stocks.getProduct())
                 .quantity(stocks.getStockPortfolioQuantity())
                 .averagePrice(stocks.getStockPortfolioAveragePrice())
@@ -198,10 +200,10 @@ public class IrBuilder {
                                 .collect(Collectors.groupingBy(d -> d.getDate().getMonth()))));
     }
 
-    public List<PropertyDto> getProperty(List<MovimentEntity> moviments, List<PropertyEntity> propertiesLastYear) {
+    public List<PropertyDto> getProperty(List<MovimentEntity> moviments, List<PropertyEntity> propertiesLastYear, int year) {
         Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(moviments, propertiesLastYear);
 
-        return getProperty(maps);
+        return getProperty(maps, year);
     }
 
     private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<MovimentEntity> irExceltDtos, List<PropertyEntity> propertiesLastYear) {

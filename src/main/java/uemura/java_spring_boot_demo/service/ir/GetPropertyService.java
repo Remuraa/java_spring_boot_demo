@@ -8,6 +8,7 @@ import uemura.java_spring_boot_demo.component.IrBuilder;
 import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
 import uemura.java_spring_boot_demo.domais.entity.PropertyEntity;
 import uemura.java_spring_boot_demo.domais.transfer.IrPropertiesResponseDto;
+import uemura.java_spring_boot_demo.domais.transfer.PropertyDto;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.repository.MovimentRepository;
 import uemura.java_spring_boot_demo.repository.PropertyRepository;
@@ -41,7 +42,7 @@ public class GetPropertyService {
         List<PropertyEntity> propertiesLastYear = propertyRepository.findAllByYear(year-1);
 
         return IrPropertiesResponseDto.builder()
-                .properties(irBuilder.getProperty(moviments, propertiesLastYear))
+                .properties(irBuilder.getProperty(moviments, propertiesLastYear, year))
                 .build();
     }
 
