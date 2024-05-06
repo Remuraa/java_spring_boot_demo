@@ -36,13 +36,13 @@ public class IrBuilder {
                 .profitCalculation(profitCalculation)
                 .lostCalculation(getLostCalculation(profitCalculation))
                 .annualIncome(getAnnualIncome(profitCalculation))
-                .earningsAndDividendsReceived(getEarningsAndDividendsReceived(irExceltDtos))
-                .interestOnEquity(getInterestOnEquity(irExceltDtos))
+                .earningsAndDividendsReceived(this.getEarningsAndDividendsReceivedOld(irExceltDtos))
+                .interestOnEquity(getInterestOnEquityOld(irExceltDtos))
                 .build();
     }
 
 
-    private List<InterestOnEquityDto> getInterestOnEquity(List<IrExceltDto> irExceltDtos) {
+    private List<InterestOnEquityDto> getInterestOnEquityOld(List<IrExceltDto> irExceltDtos) {
         return irExceltDtos
                 .stream()
                 .filter(ir -> IrMovimentEnum.INTEREST_ON_EQUITY.getValue().equals(ir.getMoviment()))
@@ -64,7 +64,7 @@ public class IrBuilder {
                 .collect(Collectors.toList());
     }
 
-    private List<EarningsAndDividendsDto> getEarningsAndDividendsReceived(List<IrExceltDto> irExceltDtos) {
+    private List<EarningsAndDividendsDto> getEarningsAndDividendsReceivedOld(List<IrExceltDto> irExceltDtos) {
         return irExceltDtos
                 .stream()
                 .filter(ir -> IrMovimentEnum.DIVIDEND.getValue().equals(ir.getMoviment()))
@@ -83,6 +83,23 @@ public class IrBuilder {
                         .value(entry.getValue())
                         .build())
                 .sorted(Comparator.comparing(EarningsAndDividendsDto::getProduct))
+                .collect(Collectors.toList());
+
+    }
+
+    public List<EarningsDto> getEarningsReceived(List<MovimentEntity> movimentsDividend) {
+        return movimentsDividend
+                .stream()
+                .collect(Collectors.groupingBy(MovimentEntity::getProduct,
+                        Collectors.reducing(BigDecimal.ZERO, MovimentEntity::getTotalPrice, BigDecimal::add)))
+                .entrySet()
+                .stream()
+                .map(entry -> EarningsDto
+                        .builder()
+                        .product(entry.getKey())
+                        .value(entry.getValue())
+                        .build())
+                .sorted(Comparator.comparing(EarningsDto::getProduct))
                 .collect(Collectors.toList());
 
     }
@@ -206,6 +223,12 @@ public class IrBuilder {
         return getProperty(maps, year);
     }
 
+    public List<ProfitCalculationDto> getProfitCalculation(List<MovimentEntity> moviments, List<PropertyEntity> propertiesLastYear) {
+        Map<Month, List<StockPortfolioAnalyticalVo>> maps = calculatePortfolioAnalytical(moviments, propertiesLastYear);
+
+        return getProfitCalculation(maps);
+    }
+
     private Map<Month, List<StockPortfolioAnalyticalVo>> calculatePortfolioAnalytical(List<MovimentEntity> irExceltDtos, List<PropertyEntity> propertiesLastYear) {
 
         return Stream.concat(
@@ -248,12 +271,10 @@ public class IrBuilder {
                                                                 lastStock.getStockPortfolioQuantity().subtract(currentStock.getQuantity()) :
                                                                 lastStock.getStockPortfolioQuantity().add(currentStock.getQuantity()));
                                                 currentStock.setStockPortfolioAveragePrice(
-                                                        currentStock.getStockPortfolioQuantity().compareTo(BigDecimal.ZERO) == 0 ?
-                                                                BigDecimal.ZERO :
-                                                                IrMovementTypeEnum.DEBIT.equals(currentStock.getMovementType()) ?
-                                                                        lastStock.getStockPortfolioAveragePrice() :
-                                                                        lastStock.getStockPortfolioAveragePrice().multiply(lastStock.getStockPortfolioQuantity()).add(currentStock.getTotalPrice())
-                                                                                .divide(currentStock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
+                                                        IrMovementTypeEnum.DEBIT.equals(currentStock.getMovementType()) ?
+                                                                lastStock.getStockPortfolioAveragePrice() :
+                                                                lastStock.getStockPortfolioAveragePrice().multiply(lastStock.getStockPortfolioQuantity()).add(currentStock.getTotalPrice())
+                                                                        .divide(currentStock.getStockPortfolioQuantity(), 2, RoundingMode.UP));
                                                 return currentStock;
                                             });
                                 })

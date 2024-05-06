@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.domais.entity.PropertyEntity;
 import uemura.java_spring_boot_demo.domais.transfer.PropertyRequestDto;
