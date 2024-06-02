@@ -1,27 +1,41 @@
 package uemura.java_spring_boot_demo.converter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uemura.java_spring_boot_demo.domais.transfer.EarningsDto;
+import uemura.java_spring_boot_demo.domais.transfer.PropertyDto;
 import uemura.java_spring_boot_demo.domais.transfer.declare.LucrosDto;
+import uemura.java_spring_boot_demo.domais.transfer.declare.PropriedadeDto;
+import uemura.java_spring_boot_demo.enums.ProductEnum;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class DeclareConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeclareConverter.class);
-
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("###,###,##0.00");
 
-    public static List<LucrosDto> converterEarnings(List<EarningsDto> earningsAndDividendsReceived) {
+    private DeclareConverter() {
+    }
+
+    public static List<LucrosDto> converterEarnings(List<EarningsDto> earningsAndDividendsReceived, Function<EarningsDto, String> fnDescricao) {
         return earningsAndDividendsReceived.stream()
                 .map(earning -> LucrosDto.builder()
                         .produto(earning.getProduct())
+                        .cnpj(earning.getCnpj())
                         .valor(DECIMAL_FORMAT.format(earning.getValue()))
+                        .descricao(fnDescricao.apply(earning))
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    public static List<PropriedadeDto> converterProprieadade(List<PropertyDto> properties) {
+        return properties.stream()
+                .map(propertie -> PropriedadeDto.builder()
+                        .descricao("AÇÕES DE " + propertie.getProduct() + " / QUANTIDADE: " + propertie.getQuantity() + " UN / CUSTO MEDIO: " + propertie.getAveragePrice() + " / CUSTODIADA NA NU INVEST - CNPJ: 62.169.875/0001-79")
+                        .produto(propertie.getProduct())
+                        .valor(DECIMAL_FORMAT.format(propertie.getTotalPrice()))
+                        .cnpj(ProductEnum.getCnpjByProduct(propertie.getProduct()))
+                        .build())
+                .toList();
+    }
 }

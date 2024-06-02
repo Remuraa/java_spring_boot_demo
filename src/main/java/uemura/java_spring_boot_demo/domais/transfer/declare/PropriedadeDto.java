@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LucrosDto implements Serializable {
+public class PropriedadeDto implements Serializable {
 
     private String produto;
     private String cnpj;

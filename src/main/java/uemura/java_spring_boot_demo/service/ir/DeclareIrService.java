@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DeclareIrService {
@@ -24,13 +25,13 @@ public class DeclareIrService {
 
     private final IrBuilder irBuilder;
     private final MovimentRepository movimentRepository;
-    private final PropertyRepository propertyRepository;
+    private final GetPropertyService getPropertyService;
 
     @Autowired
-    public DeclareIrService(IrBuilder irBuilder, MovimentRepository movimentRepository, PropertyRepository propertyRepository) {
+    public DeclareIrService(IrBuilder irBuilder, MovimentRepository movimentRepository, GetPropertyService getPropertyService) {
         this.irBuilder = irBuilder;
         this.movimentRepository = movimentRepository;
-        this.propertyRepository = propertyRepository;
+        this.getPropertyService = getPropertyService;
     }
 
     public DeclareIrResponseDto getDeclareIr(int year) {
@@ -41,12 +42,12 @@ public class DeclareIrService {
         List<MovimentEntity> movimentsInterestOnEquity = movimentRepository.findAllByMovimentDateBetweenAndMoviment(firstDayOfYear, lasDayOfYear, IrMovimentEnum.INTEREST_ON_EQUITY);
         List<MovimentEntity> movimentsYield = movimentRepository.findAllByMovimentDateBetweenAndMoviment(firstDayOfYear, lasDayOfYear, IrMovimentEnum.YIELD);
 
-
-
         return DeclareIrResponseDto.builder()
-                .lucrosDividendos(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsDividend)))
-                .jurosSobreCapitalProprio(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsInterestOnEquity)))
-                .redimento(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsYield)))
+                .propriedades(DeclareConverter.converterProprieadade(getPropertyService.getProperties(year).getProperties()))
+                .observacaoSobreLucros("Os Juros Sobre Capital Próprio não considera os creditado mas não pago")
+                .lucrosDividendos(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsDividend), earning -> null))
+                .jurosSobreCapitalProprio(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsInterestOnEquity), earning -> null))
+                .redimento(DeclareConverter.converterEarnings(irBuilder.getEarningsReceived(movimentsYield), earning -> "Rendimentos recebidos do fundo de investimento " + earning.getProduct() + "."))
                 .build();
     }
 

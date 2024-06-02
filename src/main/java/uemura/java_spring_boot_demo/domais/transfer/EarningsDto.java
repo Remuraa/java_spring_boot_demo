@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 public class EarningsDto implements Serializable {
 
     private String product;
+    private String cnpj;
     private BigDecimal value;
 
 }

@@ -97,11 +97,11 @@ public class IrBuilder {
                 .map(entry -> EarningsDto
                         .builder()
                         .product(entry.getKey())
+                        .cnpj(ProductEnum.getCnpjByProduct(entry.getKey()))
                         .value(entry.getValue())
                         .build())
                 .sorted(Comparator.comparing(EarningsDto::getProduct))
-                .collect(Collectors.toList());
-
+                .toList();
     }
 
     private BigDecimal getAnnualIncome(List<ProfitCalculationDto> profitCalculation) {
@@ -128,10 +128,10 @@ public class IrBuilder {
                                 .month(entry.getKey())
                                 .value(stockPortfolio.getTotalPrice().subtract(stockPortfolio.getQuantity().multiply(stockPortfolio.getStockPortfolioAveragePrice())))
                                 .build())
-                        .collect(Collectors.toList()))
+                        .toList())
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(ProfitCalculationDto::getMonth))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<PropertyDto> getProperty(Map<Month, List<StockPortfolioAnalyticalVo>> maps, int year) {

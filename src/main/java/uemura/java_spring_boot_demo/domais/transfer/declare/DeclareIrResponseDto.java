@@ -18,10 +18,11 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeclareIrResponseDto implements Serializable {
 
-    private List<String> propriedades;
+    private List<PropriedadeDto> propriedades;
     private List<ProfitCalculationDto> perdaVendaAcoesPorMes;
     private BigDecimal annualIncome;
     private String moviments;
+    private String observacaoSobreLucros;
     private List<LucrosDto> lucrosDividendos;
     private List<LucrosDto> jurosSobreCapitalProprio;
     private List<LucrosDto> redimento;
