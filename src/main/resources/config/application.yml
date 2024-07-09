@@ -5,6 +5,9 @@ info:
 server:
   port: 8888
 
+alphavantage:
+  apikey: "yourApikey"
+
 config:
   url-files: 'C:\Users\renan\Downloads\'
 

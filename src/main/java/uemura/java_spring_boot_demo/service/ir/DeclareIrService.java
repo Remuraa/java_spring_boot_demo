@@ -10,13 +10,11 @@ import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
 import uemura.java_spring_boot_demo.domais.transfer.declare.DeclareIrResponseDto;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.repository.MovimentRepository;
-import uemura.java_spring_boot_demo.repository.PropertyRepository;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DeclareIrService {
