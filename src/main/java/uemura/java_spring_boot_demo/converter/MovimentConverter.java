@@ -2,8 +2,8 @@ package uemura.java_spring_boot_demo.converter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
-import uemura.java_spring_boot_demo.domais.transfer.IrExceltDto;
+import uemura.java_spring_boot_demo.domains.entity.MovimentEntity;
+import uemura.java_spring_boot_demo.domains.transfer.IrExceltDto;
 import uemura.java_spring_boot_demo.enums.IrMovementTypeEnum;
 import uemura.java_spring_boot_demo.enums.IrMovimentEnum;
 import uemura.java_spring_boot_demo.enums.ProductEnum;

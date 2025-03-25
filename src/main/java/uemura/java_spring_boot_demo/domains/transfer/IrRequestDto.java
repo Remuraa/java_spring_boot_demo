@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.pojo;
+package uemura.java_spring_boot_demo.domains.transfer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -7,17 +7,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PropertyVo implements Serializable {
+public class IrRequestDto implements Serializable {
 
-    private String product;
-    private BigDecimal quantity = BigDecimal.ZERO;
-    private BigDecimal totalPrice = BigDecimal.ZERO;
+    private String nameFile;
+    private int year;
+    private List<PropertyDto> propertysLastYear;
 
 }

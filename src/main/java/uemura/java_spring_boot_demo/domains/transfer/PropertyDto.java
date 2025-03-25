@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer;
+package uemura.java_spring_boot_demo.domains.transfer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -14,9 +14,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class InterestOnEquityDto implements Serializable {
+public class PropertyDto implements Serializable {
 
+    private int year;
     private String product;
-    private BigDecimal value;
+    private BigDecimal quantity;
+    private BigDecimal averagePrice;
+    private BigDecimal totalPrice;
 
 }

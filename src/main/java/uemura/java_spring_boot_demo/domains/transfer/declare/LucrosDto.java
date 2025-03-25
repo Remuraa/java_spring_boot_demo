@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer.declare;
+package uemura.java_spring_boot_demo.domains.transfer.declare;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PropriedadeDto implements Serializable {
+public class LucrosDto implements Serializable {
 
     private String produto;
     private String cnpj;

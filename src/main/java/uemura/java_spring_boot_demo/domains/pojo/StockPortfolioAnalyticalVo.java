@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.pojo;
+package uemura.java_spring_boot_demo.domains.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

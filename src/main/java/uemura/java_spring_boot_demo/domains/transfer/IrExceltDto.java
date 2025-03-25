@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer;
+package uemura.java_spring_boot_demo.domains.transfer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.poiji.annotation.ExcelCellName;

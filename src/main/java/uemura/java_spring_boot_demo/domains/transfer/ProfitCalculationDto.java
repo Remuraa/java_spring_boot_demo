@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer;
+package uemura.java_spring_boot_demo.domains.transfer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -8,16 +8,17 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Month;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EarningsDto implements Serializable {
+public class ProfitCalculationDto implements Serializable {
 
     private String product;
-    private String cnpj;
+    private Month month;
     private BigDecimal value;
 
 }

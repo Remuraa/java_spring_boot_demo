@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer;
+package uemura.java_spring_boot_demo.domains.transfer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PropertyRequestDto implements Serializable {
+public class IrPropertiesResponseDto implements Serializable {
 
-    List<PropertyDto> properties;
+    private List<PropertyDto> properties;
+
 }

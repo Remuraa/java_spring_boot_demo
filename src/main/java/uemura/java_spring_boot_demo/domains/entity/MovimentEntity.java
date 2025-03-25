@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.entity;
+package uemura.java_spring_boot_demo.domains.entity;
 
 import lombok.*;
 import lombok.experimental.Accessors;

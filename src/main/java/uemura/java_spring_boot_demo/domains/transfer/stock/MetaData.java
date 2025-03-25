@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.domais.transfer.stock;
+package uemura.java_spring_boot_demo.domains.transfer.stock;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

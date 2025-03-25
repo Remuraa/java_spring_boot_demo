@@ -1,9 +1,9 @@
 package uemura.java_spring_boot_demo.converter;
 
-import uemura.java_spring_boot_demo.domais.transfer.EarningsDto;
-import uemura.java_spring_boot_demo.domais.transfer.PropertyDto;
-import uemura.java_spring_boot_demo.domais.transfer.declare.LucrosDto;
-import uemura.java_spring_boot_demo.domais.transfer.declare.PropriedadeDto;
+import uemura.java_spring_boot_demo.domains.transfer.EarningsDto;
+import uemura.java_spring_boot_demo.domains.transfer.PropertyDto;
+import uemura.java_spring_boot_demo.domains.transfer.declare.LucrosDto;
+import uemura.java_spring_boot_demo.domains.transfer.declare.PropriedadeDto;
 import uemura.java_spring_boot_demo.enums.ProductEnum;
 
 import java.text.DecimalFormat;

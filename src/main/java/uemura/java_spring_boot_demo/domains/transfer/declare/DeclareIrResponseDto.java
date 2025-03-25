@@ -1,11 +1,11 @@
-package uemura.java_spring_boot_demo.domais.transfer.declare;
+package uemura.java_spring_boot_demo.domains.transfer.declare;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uemura.java_spring_boot_demo.domais.transfer.ProfitCalculationDto;
+import uemura.java_spring_boot_demo.domains.transfer.ProfitCalculationDto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

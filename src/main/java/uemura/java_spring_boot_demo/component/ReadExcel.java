@@ -2,7 +2,7 @@ package uemura.java_spring_boot_demo.component;
 
 import com.poiji.bind.Poiji;
 import com.poiji.option.PoijiOptions;
-import uemura.java_spring_boot_demo.domais.transfer.IrExceltDto;
+import uemura.java_spring_boot_demo.domains.transfer.IrExceltDto;
 
 import java.io.File;
 import java.util.List;

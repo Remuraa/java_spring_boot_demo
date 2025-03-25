@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uemura.java_spring_boot_demo.component.IrBuilder;
 import uemura.java_spring_boot_demo.component.ReadExcel;
 import uemura.java_spring_boot_demo.converter.MovimentConverter;
-import uemura.java_spring_boot_demo.domais.entity.MovimentEntity;
+import uemura.java_spring_boot_demo.domains.entity.MovimentEntity;
 import uemura.java_spring_boot_demo.repository.MovimentRepository;
 
 import java.util.List;
