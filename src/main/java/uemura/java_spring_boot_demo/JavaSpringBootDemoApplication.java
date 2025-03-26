@@ -16,7 +16,8 @@ public class JavaSpringBootDemoApplication {
         ConfigurableApplicationContext run = SpringApplication.run(JavaSpringBootDemoApplication.class, args);
         ConfigurableEnvironment environment = run.getEnvironment();
 
-        log.info("\nJava Spring Boot Demo version: {}", environment.getProperty("info.version"));
+        String version = environment.getProperty("info.version");
+        log.info("\n\nJava Spring Boot Demo version: {}", version);
     }
 
 }
