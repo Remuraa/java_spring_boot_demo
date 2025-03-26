@@ -1,4 +1,4 @@
-package uemura.java_spring_boot_demo.service.ir;
+package uemura.java_spring_boot_demo.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
